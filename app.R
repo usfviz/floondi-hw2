@@ -46,14 +46,14 @@ server <- function(input, output) {
   
   all_values <- function(x) {
     if(is.null(x)) return(NULL)
-    row <- mtc[mtc$Country == x$Country, ]
+    row <- oneyear[oneyear$Country == x$Country, ]
     #paste0(names(row), ": ", format(row), collapse = "<br />")
     row$Country
   }
   
-  mtc <- oneyear
   
-  mtc %>% 
+  
+  oneyear %>% 
     ggvis(~Life, ~Fert, key := ~Country, size = ~Pop,fill = ~Region) %>%
     add_tooltip(all_values, "hover") %>%
     layer_points() %>%
