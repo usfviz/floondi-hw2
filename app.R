@@ -3,19 +3,11 @@ library(ggvis)
 
 pop <- read.csv("pop.csv")
 
-
 fert <- read.csv("fert.csv")
 
 life <- read.csv("life.csv")
 
 reg <- read.csv("Continent.csv")
-
-#year <- paste("X", as.character(2012), sep = "") ##
-# oneyear <- data.frame(pop["Country.Name"], pop[year], fert[year], life[year])
-# oneyear <- merge(x = oneyear, y = reg, by = "Country.Name", all.x = TRUE)
-# colnames(oneyear) <- c('Country', 'Pop', 'Fert', 'Life', 'Region')
-# oneyear <- na.omit(oneyear)
-
 
 ui <- fluidPage(
   headerPanel('Interactive with ggvis'),
@@ -27,22 +19,27 @@ ui <- fluidPage(
     ggvisOutput("ggvis")
   )
 )
-# can do tooltip with plotly, ggplot
-# try map with pop/fertility/life exp instead of mtcars
 
 server <- function(input, output) {
   # year<- reactive({
   #   paste("X", as.character(input$year), sep = "")
   #   })
+  #reactive({
   
-  year <- "X2000" ##
-  oneyear <- data.frame(pop["Country.Name"], pop[year], fert[year], life[year])
-  oneyear <- merge(x = oneyear, y = reg, by = "Country.Name", all.x = TRUE)
-  colnames(oneyear) <- c('Country', 'Pop', 'Fert', 'Life', 'Region')
-  oneyear <- na.omit(oneyear)
+  #year <- "X2000" ## Need to figure out how to ge this reactively
+  # oneyear <- data.frame(pop["Country.Name"], pop[year], fert[year], life[year])
+  # oneyear <- merge(x = oneyear, y = reg, by = "Country.Name", all.x = TRUE)
+  # colnames(oneyear) <- c('Country', 'Pop', 'Fert', 'Life', 'Region')
+  # oneyear <- na.omit(oneyear)
   
+  oneyear <- reactive({
+    year <- paste("X", as.character(input$year), sep = "")
+    oneyear <- data.frame(pop["Country.Name"], pop[year], fert[year], life[year])
+    oneyear <- merge(x = oneyear, y = reg, by = "Country.Name", all.x = TRUE)
+    colnames(oneyear) <- c('Country', 'Pop', 'Fert', 'Life', 'Region')
+    na.omit(oneyear)
+  })
   
-  input_size <- 20
   
   all_values <- function(x) {
     if(is.null(x)) return(NULL)
@@ -55,6 +52,8 @@ server <- function(input, output) {
   
   oneyear %>% 
     ggvis(~Life, ~Fert, key := ~Country, size = ~Pop,fill = ~Region) %>%
+    add_axis("x", title = "Life Expectancy") %>%
+    add_axis("y", title = "Fertility") %>%
     add_tooltip(all_values, "hover") %>%
     layer_points() %>%
     bind_shiny("ggvis", "ggvis_ui")
